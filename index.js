@@ -80,6 +80,16 @@ async function run() {
             res.json(result)
         })
         // Adding wishes for Clint
+        app.post('/create-payment-intent', async (req, res) => {
+            const paymentInfo = req.body;
+            const amount = paymentInfo.price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                payment_method_types: ['card']
+            });
+            res.json({ clientSecret: paymentIntent.client_secret })
+        })
         app.post('/wishes', async (req, res) => {
             const user = req.body;
             const result = await wishesCollection.insertOne(user);
@@ -121,6 +131,21 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result);
         });
+
+        app.put('/payments/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    payment: payment,
+                    activeStatus:1
+                }
+            };
+            const result = await paymentsCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
         app.delete('/cart/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
@@ -128,22 +153,20 @@ async function run() {
             const result = await cartsCollection.deleteOne(query);
             res.json(result);
         })
+        app.delete('/allCarts/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: { $regex: `${email}` } };
+            // const query = { _id: ObjectId(id) };
+            const result = await cartsCollection.deleteMany(query);
+            res.json(result);
+        })
+        
         app.delete('/wishes/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await wishesCollection.deleteOne(query);
             res.json(result);
-        })
-        app.post('/create-payment-intent', async (req, res) => {
-            const paymentInfo = req.body;
-            const amount = paymentInfo.price * 100;
-            const paymentIntent = await stripe.paymentIntents.create({
-                currency: 'usd',
-                amount: amount,  
-                payment_method_types: ['card']
-            });
-            res.json({ clientSecret: paymentIntent.client_secret })
         })
 
     } finally {
