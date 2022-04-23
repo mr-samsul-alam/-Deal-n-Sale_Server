@@ -28,6 +28,7 @@ async function run() {
         const cartsCollection = database.collection('Carts');
         const wishesCollection = database.collection('Wishes');
         const usersCollection = database.collection('Users');
+        const adminsCollection = database.collection('Admin');
         const paymentsCollection = database.collection('Payments');
 
 
@@ -37,6 +38,19 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             res.json(user);
+        })
+        // finding user data for user
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await adminsCollection.findOne(query);
+            res.json(user);
+        })
+        // finding user data for user
+        app.get('/admin', async (req, res) => {
+            const admins = adminsCollection.find({});
+            const adminsDetails = await admins.toArray();
+            res.json(adminsDetails);
         })
         //Delete It
         app.get('/users', async (req, res) => {
@@ -114,6 +128,12 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.json(result);
         });
+        //Adding Admin by Super Admin
+        app.post('/admin', async (req, res) => {
+            const user = req.body;
+            const result = await adminsCollection.insertOne(user);
+            res.json(result);
+        });
         //sending data to db
         app.post('/products', async (req, res) => {
             const user = req.body;
@@ -139,7 +159,7 @@ async function run() {
             const updateDoc = {
                 $set: {
                     payment: payment,
-                    activeStatus:1
+                    activeStatus: 1
                 }
             };
             const result = await paymentsCollection.updateOne(filter, updateDoc);
@@ -160,12 +180,19 @@ async function run() {
             const result = await cartsCollection.deleteMany(query);
             res.json(result);
         })
-        
+
         app.delete('/wishes/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await wishesCollection.deleteOne(query);
+            res.json(result);
+        })
+        app.delete('/adminDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) };
+            const result = await adminsCollection.deleteOne(query);
             res.json(result);
         })
 
