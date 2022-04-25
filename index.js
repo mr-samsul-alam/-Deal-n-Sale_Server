@@ -42,7 +42,7 @@ async function run() {
         // finding user data for user
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
-            const query = { email: email };
+            const query = { adminEmail: email };
             const user = await adminsCollection.findOne(query);
             res.json(user);
         })
@@ -51,6 +51,12 @@ async function run() {
             const admins = adminsCollection.find({});
             const adminsDetails = await admins.toArray();
             res.json(adminsDetails);
+        })
+        // finding orders data for user
+        app.get('/orders', async (req, res) => {
+            const orders = paymentsCollection.find({});
+            const ordersArray = await orders.toArray();
+            res.json(ordersArray);
         })
         //Delete It
         app.get('/users', async (req, res) => {
@@ -162,6 +168,19 @@ async function run() {
                     activeStatus: 1
                 }
             };
+            const result = await paymentsCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+        app.put('/status/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.activeStatus;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    activeStatus: status
+                }
+            };
+            console.log(id, status, updateDoc, filter);
             const result = await paymentsCollection.updateOne(filter, updateDoc);
             res.json(result);
         })
