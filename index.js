@@ -30,6 +30,7 @@ async function run() {
         const usersCollection = database.collection('Users');
         const adminsCollection = database.collection('Admin');
         const paymentsCollection = database.collection('Payments');
+        const reviewsCollection = database.collection('Reviews');
 
 
         // finding user data for user
@@ -58,12 +59,12 @@ async function run() {
             const ordersArray = await orders.toArray();
             res.json(ordersArray);
         })
-        //Delete It
-        app.get('/users', async (req, res) => {
-            const users = usersCollection.find({});
-            const myDetails = await users.toArray();
-            res.json(myDetails);
-        })
+        //Getting review
+        app.get('/reviews', async (req, res) => {
+            const reviews = reviewsCollection.find({});
+            const result = await reviews.toArray();
+            res.json(result)
+        });
 
         app.get('/products', async (req, res) => {
             const users = productsCollection.find({});
@@ -119,6 +120,13 @@ async function run() {
             const user = req.body;
             const result = await paymentsCollection.insertOne(user);
             res.json(result);
+        });
+        // posting reviews on server that comes clint side   
+
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result)
         });
 
         // Adding product from admin Dashboard 
